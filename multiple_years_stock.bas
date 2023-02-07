@@ -1,0 +1,132 @@
+Attribute VB_Name = "Module1"
+Sub ticker()
+
+'loop throught all sheets
+For Each ws In Worksheets
+
+Dim i As Long
+Dim j As Long
+Dim n As Long
+Dim totalrows As Long
+Dim totalrowsnew As Long
+Dim sum As Long
+Dim PChange As Double
+Dim total As Double
+Dim Great As Long
+Dim m As Long
+Dim Increase As Double
+Dim Decrease As Double
+Dim totval As Double
+
+'Columns headres
+ws.Cells(1, 9).Value = "Ticker"
+ws.Cells(1, 10).Value = "Yearly Change"
+ws.Cells(1, 11).Value = "Percent Change"
+ws.Cells(1, 12).Value = "Total Stock Volume"
+
+'count how many rows in total
+totalrows = (ws.Cells(Rows.Count, 1).End(xlUp).Row)
+
+'row counter for new column without matching
+n = 2
+'counter for the first match of the ticker
+j = 2
+'counter for total
+total = 0
+
+'loop
+For i = 2 To totalrows
+    'Check for ticker name is it changed
+    If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+        'write unique ticker in column 9
+        ws.Cells(n, 9).Value = ws.Cells(i, 1)
+        'calculate and write yearly change
+        ws.Cells(n, 10).Value = ws.Cells(i, 6).Value - ws.Cells(j, 3).Value
+        'put ws.Cells color
+        If ws.Cells(n, 10).Value >= 0 Then
+            ws.Cells(n, 10).Interior.ColorIndex = 4
+        Else
+            ws.Cells(n, 10).Interior.ColorIndex = 3
+        End If
+        'calculate and write percent change we have if, because we need to check of 0, because we can't divide by 0
+        If ws.Cells(j, 3).Value <> 0 Then
+            PChange = ((ws.Cells(i, 6).Value - ws.Cells(j, 3).Value) / ws.Cells(j, 3).Value)
+            ws.Cells(n, 11).Value = Format(PChange, "0.00%")
+        Else
+        ws.Cells(n, 11).Value = Format(0, "0.00%")
+        End If
+    'calculate and write total
+    total = total + ws.Cells(i, 7).Value
+    ws.Cells(n, 12).Value = total
+    total = 0
+    'add new unique ticker counter
+    n = n + 1
+    'add new ticker first element finder
+    j = i + 1
+    Else
+    total = total + ws.Cells(i, 7).Value
+    'end if
+    End If
+    'going next in loop i=i+1
+Next i
+
+'functionality adding
+ws.Cells(2, 15).Value = "Greatest % Increase"
+ws.Cells(3, 15).Value = "Greatest % Decrease"
+ws.Cells(4, 15).Value = "Greatest Total Volume"
+ws.Cells(1, 16).Value = "Ticker"
+ws.Cells(1, 17).Value = "Value"
+
+'finding how many rows in the unique ticker
+totalrowsnew = (ws.Cells(Rows.Count, 9).End(xlUp).Row)
+
+'declaring new argument which i will need to find greatest increase, decrease and total
+Increase = ws.Cells(2, 11).Value
+Decrease = ws.Cells(2, 11).Value
+totval = ws.Cells(2, 12).Value
+
+'loop
+For k = 2 To totalrowsnew
+
+        'finding up greatest increase and format cell to percentage
+        If ws.Cells(k, 11).Value > Increase Then
+            Increase = ws.Cells(k, 11).Value
+            ws.Cells(2, 16).Value = ws.Cells(k, 9).Value
+            ws.Cells(2, 17).Value = Format(ws.Cells(k, 11).Value, "0.00%")
+        'if the greatest value is in the first row
+        ElseIf Increase = ws.Cells(2, 11).Value Then
+            ws.Cells(2, 16).Value = ws.Cells(2, 9).Value
+            ws.Cells(2, 17).Value = Format(ws.Cells(2, 11).Value, "0.00%")
+        End If
+        
+        'finding up greatest decrease and format cell to percentage
+        If ws.Cells(k, 11).Value < Decrease Then
+            Decrease = ws.Cells(k, 11).Value
+            ws.Cells(3, 16).Value = ws.Cells(k, 9).Value
+            ws.Cells(3, 17).Value = Format(ws.Cells(k, 11).Value, "0.00%")
+        'if the greatest value is in the first row
+        ElseIf Decrease = ws.Cells(2, 11).Value Then
+            ws.Cells(3, 16).Value = ws.Cells(2, 9).Value
+            ws.Cells(3, 17).Value = Format(ws.Cells(2, 11).Value, "0.00%")
+        End If
+        
+        'finding up greatest total
+        If ws.Cells(k, 12).Value > totval Then
+            totval = ws.Cells(k, 12).Value
+            ws.Cells(4, 16).Value = ws.Cells(k, 9).Value
+            ws.Cells(4, 17).Value = ws.Cells(k, 12).Value
+        'if the greatest value is in the first row
+        ElseIf totval = ws.Cells(2, 12).Value Then
+            ws.Cells(4, 16).Value = ws.Cells(2, 9).Value
+            ws.Cells(4, 17).Value = ws.Cells(2, 12).Value
+        End If
+        
+Next k
+
+'next worksheet
+Next ws
+'for myself to understand when program finish it's work
+MsgBox ("complite")
+
+End Sub
+
